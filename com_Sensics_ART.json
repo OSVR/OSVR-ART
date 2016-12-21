@@ -1,0 +1,74 @@
+{
+	"deviceVendor": "ART",
+	"deviceName": "SmartTrack",
+	"author": "Georgiy Frolov <georgiy@sensics.com>",
+	"version": 1,
+	"lastModified": "",
+	"interfaces": {
+		"tracker": {
+			"count": 8,
+			"position": true,
+			"orientation": true
+		},
+		"button": {
+			"count": 24
+		},
+		"analog": {
+			"count": 4
+		}
+	},
+	"semantic": {
+		"body": {
+			"0": "tracker/0",
+			"1": "tracker/1",
+			"2": "tracker/2",
+			"3": "tracker/3"
+		},
+		"flysticks": {
+			"0": {
+				"$target": "tracker/10",
+				"id0": "button/0",
+				"id1": "button/1",
+				"id2": "button/2",
+				"id3": "button/3",
+				"id4": "button/4",
+				"id5": "button/5",
+				"joystick": "analog/0"
+			},
+			"1": {
+				"$target": "tracker/11",
+				"id0": "button/10",
+				"id1": "button/11",
+				"id2": "button/12",
+				"id3": "button/13",
+				"id4": "button/14",
+				"id5": "button/15",
+				"joystick": "analog/1"
+			},
+			"2": {
+				"$target": "tracker/12",
+				"id0": "button/20",
+				"id1": "button/21",
+				"id2": "button/22",
+				"id3": "button/23",
+				"id4": "button/24",
+				"id5": "button/25",
+				"joystick": "analog/2"
+			},
+			"3": {
+				"$target": "tracker/13",
+				"id0": "button/30",
+				"id1": "button/31",
+				"id2": "button/32",
+				"id3": "button/33",
+				"id4": "button/34",
+				"id5": "button/35",
+				"joystick": "analog/3"
+			}
+		}
+	},
+	"automaticAliases": {
+		"/me/head": "semantic/body/0",
+		"me/controller": "semantic/flystick/0"
+	}
+}
