@@ -1,0 +1,12 @@
+{
+	"drivers": [{
+		"plugin": "com_Sensics_ART",
+		"driver": "OSVR_ART",
+		"params": {
+            "serverHost": "192.168.0.1",
+            "dataPort": 5000
+		}
+	}],
+	"display": "displays/OSVR_HDK_2_0.json",
+	"renderManagerConfig": "sample-configs/renderManager.direct.landscape.HDKv2.0.json"
+}
