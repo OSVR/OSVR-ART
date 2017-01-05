@@ -1,11 +1,11 @@
-#OSVR-ART plugin
+# OSVR-ART plugin
 
-Usage instructions :
+## Usage instructions
 
 Before loading the plugin, open DTrack2 software:
 
 1. Make sure that one or more bodies are calibrated and tracked
-2. Output settings: Send to -> this computer. Port 5000 (make sure that your system doesn’t use or block this port)
+2. Output settings: Send to -> this computer. Port 5000 (make sure that your system doesn't use or block this port)
 
 Make a note of the IP address of the tracking system and specify it in `serverHost` parameter in server config and specify port (if different from 5000) in `dataPort` parameter. By default plugin will use `192.168.0.1` and port `5000`.
 
