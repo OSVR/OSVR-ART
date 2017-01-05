@@ -149,12 +149,12 @@ class ARTDevice {
     DTrackPtr m_dTrack;
 };
 
-class HardwareDetection {
+class CreateART {
   public:
+    OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx,
+                               const char *params) const {
 
-    OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx, const char *params) {
-
-        std::cout << PREFIX << "Got a hardware detection request" << std::endl;
+        std::cout << PREFIX << "Creating device" << std::endl;
 
         Json::Value root;
         {
@@ -254,8 +254,7 @@ OSVR_PLUGIN(com_Sensics_ART) {
 
     osvr::pluginkit::PluginContext context(ctx);
 
-    context.registerDriverInstantiationCallback(DRIVER_NAME,
-                                                HardwareDetection());
+    context.registerDriverInstantiationCallback(DRIVER_NAME, CreateART());
 
     return OSVR_RETURN_SUCCESS;
 }
