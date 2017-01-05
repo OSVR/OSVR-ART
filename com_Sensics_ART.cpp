@@ -122,49 +122,18 @@ class ARTDevice {
             }
         }
 
-        // A.R.T. Flysticks:
-        DTrack_FlyStick_Type_d flystick;
-        for (int i = 0; i < m_dTrack->getNumFlyStick(); i++) {
-            flystick = *m_dTrack->getFlyStick(i);
-            OSVR_TimeValue timestamp;
-            osvrTimeValueGetNow(&timestamp);
-            if (flystick.quality > 0) {
-                OSVR_PoseState state;
-                convertPose(&state, flystick.loc, flystick.rot);
-
-                /// add FLYSTICK_ID_OFFSET to sensor number
-                osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &state,
-                                                     (i + FLYSTICK_ID_OFFSET),
-                                                     &timestamp);
-            }
-
-            for (int j = 0; j < flystick.num_button; j++) {
-                /// offsets the sensor ID. For example if Flystick with id of 0
-                /// then its button are numbered 0-5. For id of 1, buttons are
-                /// numbered 10-15, etc.
-                osvrDeviceButtonSetValueTimestamped(
-                    m_dev, m_button, flystick.button[j],
-                    j + (i * FLYSTICK_ID_OFFSET), &timestamp);
-            }
-
-            for (int j = 0; j < flystick.num_joystick; j++) {
-                /// no additional sensor ID offsets
-                osvrDeviceAnalogSetValueTimestamped(
-                    m_dev, m_analog, flystick.joystick[j], i, &timestamp);
-            }
-        }
-
         return OSVR_RETURN_SUCCESS;
     }
 
   private:
+      
     /* @brief converts position and orientation to OSVR report types*/
     void convertPose(OSVR_PoseState *state, double *loc, double *rot) {
 
         /// convert to unit meter
-        state->translation.data[0] = loc[0] / 1000;
-        state->translation.data[1] = loc[1] / 1000;
-        state->translation.data[2] = loc[2] / 1000;
+        state->translation.data[0] = (-1.0) * (loc[0] / 1000.0);
+        state->translation.data[1] = (-1.0) * (loc[1] / 1000.0);
+        state->translation.data[2] = (-1.0) * (loc[2] / 1000.0);
 
         q_type quat;
         q_matrix_type destMatrix;
@@ -190,12 +159,12 @@ class ARTDevice {
         destMatrix[3][2] = 0.0;
         destMatrix[3][3] = 1.0;
 
-        q_from_col_matrix(quat, destMatrix);
+        q_from_row_matrix(quat, destMatrix);
 
-        osvrQuatSetW(&state->rotation, quat[3]);
-        osvrQuatSetX(&state->rotation, quat[0]);
-        osvrQuatSetY(&state->rotation, quat[1]);
-        osvrQuatSetZ(&state->rotation, quat[2]);
+        osvrQuatSetW(&state->rotation, quat[Q_W]);
+        osvrQuatSetX(&state->rotation, quat[Q_X]);
+        osvrQuatSetY(&state->rotation, quat[Q_Y]);
+        osvrQuatSetZ(&state->rotation, quat[Q_Z]);
     }
 
     osvr::pluginkit::DeviceToken m_dev;
