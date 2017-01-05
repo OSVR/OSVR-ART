@@ -11,8 +11,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(osvr REQUIRED)
 find_package(JsonCpp REQUIRED)
+find_package(Eigen3 REQUIRED)
 
-add_subdirectory(quat)
+#add_subdirectory(quat)
 
 # Generate our JSON header file
 osvr_convert_json(com_Sensics_ART_json
@@ -44,14 +45,13 @@ osvr_add_plugin(com_Sensics_ART
 # Be able to find our generated header file and dtrack sdk
 target_include_directories(com_Sensics_ART
     PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}"
-    "${DTRACK_SDK_INCLUDE_DIR}")
+    "${DTRACK_SDK_INCLUDE_DIR}"
+    "${EIGEN3_INCLUDE_DIR}")
 target_link_libraries(com_Sensics_ART
     osvr::osvrPluginKitCpp
     osvr::osvrUtil
-    JsonCpp::JsonCpp
-    quat)
+    JsonCpp::JsonCpp)
 if(WIN32)
     target_link_libraries(com_Sensics_ART ws2_32)
 endif()

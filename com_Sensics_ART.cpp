@@ -25,6 +25,8 @@
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/EigenInterop.h>
 #include <osvr/PluginKit/ButtonInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 #include <osvr/Util/Log.h>
@@ -50,6 +52,18 @@ static const auto FLYSTICK_ID_OFFSET = 10;
 inline const uint16_t getDataPortDefault() { return 5000; }
 inline const std::string getServerHostDefault() { return "192.168.0.1"; }
 typedef std::shared_ptr<DTrackSDK> DTrackPtr;
+
+/* @brief converts position and orientation to OSVR report types*/
+static inline void convertPose(OSVR_PoseState &state, double loc[3],
+                               double rot[9]) {
+    namespace ei = osvr::util::eigen_interop;
+
+    /// convert to unit meter
+    /// @todo needs a -1? There was one before...
+    ei::map(state).translation() = Eigen::Vector3d::Map(loc) / 1000.;
+    using ColMat3d = Eigen::Matrix<double, 3, 3, Eigen::ColMajor>;
+    ei::map(state).rotation() = Eigen::Quaterniond(ColMat3d::Map(rot));
+}
 
 class ARTDevice {
   public:
@@ -115,7 +129,7 @@ class ARTDevice {
                 OSVR_TimeValue timestamp;
                 osvrTimeValueGetNow(&timestamp);
                 OSVR_PoseState state;
-                convertPose(&state, body.loc, body.rot);
+                convertPose(state, body.loc, body.rot);
 
                 osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &state,
                                                      i, &timestamp);
@@ -126,47 +140,6 @@ class ARTDevice {
     }
 
   private:
-      
-    /* @brief converts position and orientation to OSVR report types*/
-    void convertPose(OSVR_PoseState *state, double *loc, double *rot) {
-
-        /// convert to unit meter
-        state->translation.data[0] = (-1.0) * (loc[0] / 1000.0);
-        state->translation.data[1] = (-1.0) * (loc[1] / 1000.0);
-        state->translation.data[2] = (-1.0) * (loc[2] / 1000.0);
-
-        q_type quat;
-        q_matrix_type destMatrix;
-
-        /// rot is a column-wise matrix
-        destMatrix[0][0] = rot[0]; // mat[1][1]
-        destMatrix[0][1] = rot[1]; // mat[1][2]
-        destMatrix[0][2] = rot[2]; // mat[1][3]
-        destMatrix[0][3] = 0.0;    // mat[1][4]
-
-        destMatrix[1][0] = rot[3];
-        destMatrix[1][1] = rot[4];
-        destMatrix[1][2] = rot[5];
-        destMatrix[1][3] = 0.0;
-
-        destMatrix[2][0] = rot[6];
-        destMatrix[2][1] = rot[7];
-        destMatrix[2][2] = rot[8];
-        destMatrix[2][3] = 0.0;
-
-        destMatrix[3][0] = 0.0;
-        destMatrix[3][1] = 0.0;
-        destMatrix[3][2] = 0.0;
-        destMatrix[3][3] = 1.0;
-
-        q_from_row_matrix(quat, destMatrix);
-
-        osvrQuatSetW(&state->rotation, quat[Q_W]);
-        osvrQuatSetX(&state->rotation, quat[Q_X]);
-        osvrQuatSetY(&state->rotation, quat[Q_Y]);
-        osvrQuatSetZ(&state->rotation, quat[Q_Z]);
-    }
-
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_TrackerDeviceInterface m_tracker;
     OSVR_ButtonDeviceInterface m_button;
