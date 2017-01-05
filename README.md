@@ -14,12 +14,6 @@ The ART system supports a varying number of tracked devices. Please refer the AR
 The device descriptor accounts for 4 tracked bodies and 4 tracked Flysticks.
 Depending on your setup, the plugin will automatically recognize which device are tracked (reported by ART system), and send reports as they're available.
 
-To build the plugin:
+## Building
 
-There are additional files from dTrackSDK that you will need to copy to your source directory, which are not included, but can be found in :
-
-- DTrackSDK.hpp/cpp
-- DTrackNet.h/cpp
-- DTrackParse.hpp/cpp
-- DTrackParser.hpp/cpp
-- DTrackDataTypes.h
+Copy the `include` and `src` directories from the DTrack SDK into the `DTrackSDK` directory before running CMake.
