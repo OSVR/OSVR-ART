@@ -151,15 +151,8 @@ class ARTDevice {
 
 class HardwareDetection {
   public:
-    HardwareDetection() : m_found(false) {}
 
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx, const char *params) {
-
-        // if the device has been discovered we don't need to go thru hardware
-        // detection again
-        if (m_found) {
-            return OSVR_RETURN_SUCCESS;
-        }
 
         std::cout << PREFIX << "Got a hardware detection request" << std::endl;
 
@@ -248,15 +241,11 @@ class HardwareDetection {
             return OSVR_RETURN_FAILURE;
         }
 
-        m_found = true;
         osvr::pluginkit::registerObjectForDeletion(
             ctx, new ARTDevice(ctx, std::move(dTrack)));
 
         return OSVR_RETURN_SUCCESS;
     }
-
-  private:
-    bool m_found;
 };
 
 } // namespace
