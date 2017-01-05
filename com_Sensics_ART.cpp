@@ -23,19 +23,18 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/PluginKit/AnalogInterfaceC.h>
+#include <osvr/PluginKit/ButtonInterfaceC.h>
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenInterop.h>
-#include <osvr/PluginKit/ButtonInterfaceC.h>
-#include <osvr/PluginKit/AnalogInterfaceC.h>
 #include <osvr/Util/Log.h>
-#include <json/value.h>
-#include <json/reader.h>
-#include <quat/quat.h>
 
 // Library/third-party includes
 #include "DTrackSDK.hpp"
+#include <json/reader.h>
+#include <json/value.h>
 
 // Generated JSON header file
 #include "com_Sensics_ART_json.h"
@@ -208,8 +207,7 @@ class CreateART {
                   << "Server host: " << serverHostParam
                   << "; Data port: " << dataPortParam << std::endl;
 
-        DTrackPtr dTrack(
-            new DTrackSDK(serverHostParam, dataPortParam));
+        DTrackPtr dTrack(new DTrackSDK(serverHostParam, dataPortParam));
 
         if (!dTrack->isLocalDataPortValid() ||
             !dTrack->isCommandInterfaceValid()) {
