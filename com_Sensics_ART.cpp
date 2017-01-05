@@ -42,6 +42,7 @@
 
 // Standard includes
 #include <iostream>
+#include <memory>
 
 namespace {
 
@@ -51,7 +52,7 @@ static const auto PREFIX = "[OSVR-ART]: ";
 static const auto FLYSTICK_ID_OFFSET = 10;
 inline const uint16_t getDataPortDefault() { return 5000; }
 inline const std::string getServerHostDefault() { return "192.168.0.1"; }
-typedef std::shared_ptr<DTrackSDK> DTrackPtr;
+typedef std::unique_ptr<DTrackSDK> DTrackPtr;
 
 /* @brief converts position and orientation to OSVR report types*/
 static inline void convertPose(OSVR_PoseState &state, double loc[3],
@@ -67,7 +68,8 @@ static inline void convertPose(OSVR_PoseState &state, double loc[3],
 
 class ARTDevice {
   public:
-    ARTDevice(OSVR_PluginRegContext ctx, DTrackPtr dTrack) : m_dTrack(dTrack) {
+    ARTDevice(OSVR_PluginRegContext ctx, DTrackPtr &&dTrack)
+        : m_dTrack(std::move(dTrack)) {
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
@@ -144,7 +146,7 @@ class ARTDevice {
     OSVR_TrackerDeviceInterface m_tracker;
     OSVR_ButtonDeviceInterface m_button;
     OSVR_AnalogDeviceInterface m_analog;
-    std::shared_ptr<DTrackSDK> m_dTrack;
+    DTrackPtr m_dTrack;
 };
 
 class HardwareDetection {
@@ -214,11 +216,11 @@ class HardwareDetection {
                   << "Server host: " << serverHostParam
                   << "; Data port: " << dataPortParam << std::endl;
 
-        m_dTrack = std::shared_ptr<DTrackSDK>(
-            new DTrackSDK(serverHostParam.c_str(), dataPortParam));
+        DTrackPtr dTrack(
+            new DTrackSDK(serverHostParam, dataPortParam));
 
-        if (!m_dTrack->isLocalDataPortValid() ||
-            !m_dTrack->isCommandInterfaceValid()) {
+        if (!dTrack->isLocalDataPortValid() ||
+            !dTrack->isCommandInterfaceValid()) {
             std::cout << PREFIX << "Could not initialize DTrackSDK"
                       << std::endl;
             return OSVR_RETURN_FAILURE;
@@ -228,16 +230,15 @@ class HardwareDetection {
                   << " server port "
                   << ", data port " << dataPortParam << std::endl;
 
-        bool measRunning = m_dTrack->startMeasurement();
+        bool measRunning = dTrack->startMeasurement();
         if (!measRunning) {
             std::cout << PREFIX << "Start measurement failed! " << std::endl;
-            while (m_dTrack->getMessage()) {
-                std::cout << "ATC Message: " << m_dTrack->getMessageStatus()
-                          << "\" \"" << m_dTrack->getMessageMsg() << "\""
+            while (dTrack->getMessage()) {
+                std::cout << "ATC Message: " << dTrack->getMessageStatus()
+                          << "\" \"" << dTrack->getMessageMsg() << "\""
                           << std::endl;
                 // ignore this error and continue
-                if (m_dTrack->getMessageMsg() ==
-                    "measurement already running") {
+                if (dTrack->getMessageMsg() == "measurement already running") {
                     measRunning = true;
                 }
             }
@@ -249,14 +250,13 @@ class HardwareDetection {
 
         m_found = true;
         osvr::pluginkit::registerObjectForDeletion(
-            ctx, new ARTDevice(ctx, m_dTrack));
+            ctx, new ARTDevice(ctx, std::move(dTrack)));
 
         return OSVR_RETURN_SUCCESS;
     }
 
   private:
     bool m_found;
-    DTrackPtr m_dTrack;
 };
 
 } // namespace
