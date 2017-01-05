@@ -122,14 +122,13 @@ class ARTDevice {
         }
 
         // bodies:
-        DTrack_Body_Type_d body;
+        OSVR_TimeValue timestamp;
+        osvrTimeValueGetNow(&timestamp);
         for (int i = 0; i < m_dTrack->getNumBody(); i++) {
-            body = *m_dTrack->getBody(i);
+            auto body = *m_dTrack->getBody(i);
 
             if (body.quality > 0) {
 
-                OSVR_TimeValue timestamp;
-                osvrTimeValueGetNow(&timestamp);
                 OSVR_PoseState state;
                 convertPose(state, body.loc, body.rot);
 
